@@ -29,3 +29,4 @@ jobs:
           SM_ROLE_ARN: ${{ env.SM_ROLE_ARN }}
         run: |
           python start_training.py
+#test
