@@ -1,25 +1,24 @@
 # start_training.py
-import os, time
+import os
 import sagemaker
 from sagemaker.sklearn import SKLearn
 from sagemaker.inputs import TrainingInput
 
-# ---- CONFIGURE THESE ----
-ROLE_ARN = os.getenv("SM_ROLE_ARN")            # set via GitHub Actions secret
-BUCKET   = "prathvi-raw"                       # your bucket
-PROCESSED_PREFIX = "processed/"                # input data
-OUTPUT_S3 = f"s3://{BUCKET}/models/"           # where model artifacts go
-FRAMEWORK_VERSION = "1.2-1"                    # scikit-learn container version
-INSTANCE_TYPE = "ml.m5.large"                  # smallest common training type
-# -------------------------
+# ----- CONFIGURE THESE -----
+ROLE_ARN = os.getenv("SM_ROLE_ARN")          # set as GitHub secret
+BUCKET = "prathvi-raw"                       # your bucket
+PROCESSED_PREFIX = "processed/"              # input data prefix
+OUTPUT_S3 = f"s3://{BUCKET}/models/"         # where model artifacts go
+FRAMEWORK_VERSION = "1.2-1"                  # sklearn container
+INSTANCE_TYPE = "ml.m5.large"                # training instance
+# ---------------------------
 
 session = sagemaker.Session()
-region = session.boto_region_name
-account = sagemaker.session.get_caller_identity_arn().split(":")[4]
 
-# Estimator (Script Mode runs train.py that you already added)
+# estimator will run train.py from the repo root
 estimator = SKLearn(
     entry_point="train.py",
+    source_dir=".",                  # include your script from repo root
     role=ROLE_ARN,
     instance_type=INSTANCE_TYPE,
     instance_count=1,
@@ -30,7 +29,7 @@ estimator = SKLearn(
     base_job_name="etl-ml-diabetes"
 )
 
-# Training input points to processed CSVs
+# point to your processed CSVs in S3
 train_input = TrainingInput(
     s3_data=f"s3://{BUCKET}/{PROCESSED_PREFIX}",
     content_type="text/csv"
