@@ -115,9 +115,16 @@ def train_local_xgb(df_train, df_val, df_test):
         verbose_eval=10
     )
 
-    preds_prob = bst.predict(dtest, ntree_limit=bst.best_ntree_limit if hasattr(bst, "best_ntree_limit") else NUM_ROUND)
+    # ----- Modern XGBoost-compatible prediction -----
+    if hasattr(bst, "best_iteration") and bst.best_iteration is not None:
+        preds_prob = bst.predict(dtest, iteration_range=(0, bst.best_iteration + 1))
+    else:
+        preds_prob = bst.predict(dtest)
+    
     preds = (preds_prob > 0.5).astype(int)
     acc = accuracy_score(y_test, preds)
+# ------------------------------------------------
+
     print(f"\n==============================")
     print(f" Final Test Accuracy: {acc:.4f}")
     print(f" Best iteration: {getattr(bst, 'best_iteration', 'N/A')}")
