@@ -91,8 +91,9 @@ def main():
         eta=0.2,
         max_depth=5,
         subsample=0.8,
-        silent=0
+        verbosity=1                   # replace deprecated 'silent'
     )
+
 
     train_input = TrainingInput(s3_data=train_s3_uri, content_type="text/csv")
     print("[INFO] Starting XGBoost training job...")
